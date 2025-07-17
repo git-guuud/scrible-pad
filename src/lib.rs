@@ -1,48 +1,11 @@
-mod client;
-mod server;
+// mod client;
 
-
-
-// use core::str;
-
-// use tokio;
-
-// use yew::prelude::*;
-
-// #[function_component]
-// fn App() -> Html {
-//     html! { "hello world" }
-// }
-
-// #[tokio::main]
-// async fn main() {
-    // yew::Renderer::<App>::new().render();
-    // let url: &'static str = "wss://echo.websocket.events";
-    // let (ws_stream, _) = connect_async(url).await.unwrap();
-    // let (mut write, mut read) = ws_stream.split();
-    // let msg = Message::Text("Hello WebSocket".into());
-    // write.send(msg).await.unwrap();
-
-    // while let Some(Ok(msg)) = read.next().await {
-    //     if let Message::Text(text) = msg {
-    //         println!("Received: {}", text);
-    //     }
-    // }
-
-    
-    
-
-    // let addr = "127.0.0.1:8080";
-    // tokio::spawn(client::print_next(0, "ws://127.0.0.1:8080"));
-    // tokio::spawn(client::print_next(1, "ws://127.0.0.1:8080"));
-    // tokio::spawn(client::print_next(2, "ws://127.0.0.1:8080"));
-    // server::run(addr).await;
-
-// }
 
 
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
+use tokio_tungstenite_wasm::{connect, Message};
+use futures_util::{SinkExt, StreamExt};
 
 #[derive(Serialize, Deserialize)]
 struct Stroke {
@@ -60,11 +23,12 @@ struct Pos {
 
 #[wasm_bindgen(module = "/site/rust_call.js")]
 extern "C" {
-    pub fn draw(stroke_width: f32, stroke_color: String, stroke_points: Vec<Pos>);
+    pub fn draw(jsonStroke: String);
+    pub fn log(message: String);
 }
 
 #[wasm_bindgen(start)]
-fn main() {
+async fn main() {
     let stroke = Stroke {
         color: "red".to_string(),
         width: 5.0,
@@ -74,5 +38,25 @@ fn main() {
             Pos { x: 50.0, y: 60.0 },
         ],
     };
-    draw(stroke.width, stroke.color, stroke.points);
+    // draw(stroke.width, stroke.color, stroke.points);
+    let ws_stream = connect("ws://localhost:8080").await.unwrap();
+    log("WebSocket connected".to_string());
+    let (mut write, mut read) = ws_stream.split();
+    let msg = Message::Text(serde_json::to_string(&stroke).unwrap().into());
+
+    write.send(msg).await.unwrap();
+    while let Some(Ok(msg)) = read.next().await {
+        if let Message::Text(text) = msg {
+            log(format!("Received: {}", text));
+            draw(text.to_string());
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub async fn send(json: String) {
+    let ws_stream = connect("ws://localhost:8080").await.unwrap();
+    let (mut write, _) = ws_stream.split();
+    let msg = Message::Text(json.into());
+    write.send(msg).await.unwrap();
 }
