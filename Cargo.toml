@@ -1,0 +1,16 @@
+[package]
+name = "scrible-pad"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.4"
+futures-util = "0.3.31"
+serde = { version = "1.0.219", features = ["derive"] }
+tokio = { version = "1.46.1", features = ["full"] }
+tokio-tungstenite-wasm = { version = "0.6.0", features = ["native-tls"] }
+wasm-bindgen = { version = "0.2.100", features = ["serde", "serde_json"] }
+yew = { version = "0.21.0", features = ["csr"] }
+
+[lib]
+crate-type = ["cdylib"]
