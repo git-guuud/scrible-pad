@@ -1,4 +1,4 @@
-import { initSync, send } from "./node_modules/scrible-pad/scrible_pad.js";
+import initSync, {send, receive_messages} from "./node_modules/scrible-pad/scrible_pad.js";
 
 let painting = false;
 let stroke = {
@@ -10,15 +10,16 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 
-function startPainting(e) {
+async function startPainting(e) {
+    await initSync();
+    ctx.beginPath();
     painting = true;
     draw(e);
 }
 
-function stopPainting() {
+async function stopPainting() {
+    await send(JSON.stringify(stroke));
     painting = false;
-    ctx.beginPath();
-    send(JSON.stringify(stroke));
     stroke.points = []; // Clear points after sending
 }
 
@@ -39,3 +40,5 @@ function draw(e) {
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", stopPainting);
 canvas.addEventListener("mousemove", draw);
+
+document.getElementById("clearButton").onclick = receive_messages;

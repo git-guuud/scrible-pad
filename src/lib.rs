@@ -2,10 +2,27 @@
 
 
 
+
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
-use tokio_tungstenite_wasm::{connect, Message};
-use futures_util::{SinkExt, StreamExt};
+
+use std::sync::{OnceLock, Mutex};
+use ws_stream_wasm::{WsMessage, WsMeta, WsStream};
+use futures_util::{stream::StreamExt, SinkExt};
+
+static GLOBAL_WS: OnceLock<Mutex<WsStream>> = OnceLock::new();
+
+#[wasm_bindgen(start)]
+async fn connect_to_websocket() {
+    let (_, ws_stream) = WsMeta::connect("ws://127.0.0.1:8080", None).await.unwrap();
+    GLOBAL_WS.get_or_init(|| Mutex::new(ws_stream));
+}
+
+async fn get_global_ws_stream() -> Option<std::sync::MutexGuard<'static, WsStream>> {
+    GLOBAL_WS.get()
+        .and_then(|mutex| mutex.lock().ok())
+}
+
 
 #[derive(Serialize, Deserialize)]
 struct Stroke {
@@ -27,36 +44,28 @@ extern "C" {
     pub fn log(message: String);
 }
 
-#[wasm_bindgen(start)]
-async fn main() {
-    let stroke = Stroke {
-        color: "red".to_string(),
-        width: 5.0,
-        points: vec![
-            Pos { x: 10.0, y: 20.0 },
-            Pos { x: 30.0, y: 40.0 },
-            Pos { x: 50.0, y: 60.0 },
-        ],
-    };
-    // draw(stroke.width, stroke.color, stroke.points);
-    let ws_stream = connect("ws://localhost:8080").await.unwrap();
-    log("WebSocket connected".to_string());
-    let (mut write, mut read) = ws_stream.split();
-    let msg = Message::Text(serde_json::to_string(&stroke).unwrap().into());
-
-    write.send(msg).await.unwrap();
-    while let Some(Ok(msg)) = read.next().await {
-        if let Message::Text(text) = msg {
-            log(format!("Received: {}", text));
-            draw(text.to_string());
-        }
+#[wasm_bindgen]
+pub async fn send(message: String) {
+    // receive_messages().await; // Ensure we are ready to receive messages
+    if let Some(mut stream) = get_global_ws_stream().await {
+        let _ = stream.send(WsMessage::Text(message)).await;
     }
 }
 
 #[wasm_bindgen]
-pub async fn send(json: String) {
-    let ws_stream = connect("ws://localhost:8080").await.unwrap();
-    let (mut write, _) = ws_stream.split();
-    let msg = Message::Text(json.into());
-    write.send(msg).await.unwrap();
+pub async fn receive_messages() {
+    if let Some(mut stream) = get_global_ws_stream().await {
+        while let Some(msg) = stream.next().await {
+            match msg {
+                WsMessage::Text(text) => {
+                    log(format!("Received: {}", text));
+                    draw(text);
+                }
+                _ => {
+                    // Handle other message types if needed
+                }
+            }
+        }
+        log("Stopped receiving messages".to_string());
+    }
 }
