@@ -1,4 +1,4 @@
-import initSync, {send, receive_messages} from "./node_modules/scrible-pad/scrible_pad.js";
+import initSync, {send, receive_messages, connect_to_websocket} from "./node_modules/scrible-pad/scrible_pad.js";
 
 let painting = false;
 let stroke = {
@@ -9,9 +9,15 @@ let stroke = {
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+await initSync();
+connect_to_websocket().then(() => {
+    console.log("Connected to WebSocket");
+    receive_messages();
+}).catch(err => {
+    console.error("Error connecting to WebSocket:", err);
+});
 
 async function startPainting(e) {
-    await initSync();
     ctx.beginPath();
     painting = true;
     draw(e);
@@ -40,5 +46,17 @@ function draw(e) {
 canvas.addEventListener("mousedown", startPainting);
 canvas.addEventListener("mouseup", stopPainting);
 canvas.addEventListener("mousemove", draw);
+document.getElementById("clearButton").addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stroke.points = []; // Clear points on clear
+    send("Clear");
+});
 
-document.getElementById("clearButton").onclick = receive_messages;
+document.getElementById("colorPicker").addEventListener("input", (e) => {
+    stroke.color = e.target.value;
+});
+
+document.getElementById("widthPicker").addEventListener("input", (e) => {
+    stroke.width = parseInt(e.target.value, 10);
+});
+receive_messages();
