@@ -1,9 +1,10 @@
 # How to use
+Run in windows powershell
 Clone the repository 
 ```
 git clone https://github.com/git-guuud/scrible-pad.git
 ```
-Run the server
+Run the server (make sure localhost:8080 is not in use already)
 ```
 scrible-pad/backend/backend.exe
 ```
