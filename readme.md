@@ -2,6 +2,9 @@
 Clone the repository 
 ```
 git clone https://github.com/git-guuud/scrible-pad.git
+```
+Run the server
+```
 scrible-pad/backend/backend.exe
 ```
 In another terminal, navigate to the project directory and run:
