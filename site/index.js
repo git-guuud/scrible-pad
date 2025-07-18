@@ -31,6 +31,7 @@ async function stopPainting() {
     painting = false;
     if (stroke.points.length === 0) return; 
     let pngData = canvas.toDataURL("image/png").split(",")[1];
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     setPNG(pngData); 
     send("Load:" + pngData);
     stroke.points = []; // Clear points after sending

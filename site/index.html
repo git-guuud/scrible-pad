@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrible-Pad</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scrible-Pad</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="toolbar">
-        <input type="color" id="colorPicker" value="#000000">
-        <input type="range" id="widthPicker" min="1" max="50" value="5">
+  <div id="app">
+    <header>
+      <h1>Scrible-Pad</h1>
+      <div class="toolbar">
+        <label>
+          Color:
+          <input type="color" id="colorPicker" value="#000000" />
+        </label>
+        <label>
+          Width:
+          <input type="range" id="widthPicker" min="1" max="50" value="5" />
+        </label>
         <button id="clearButton">Clear</button>
-        <button id="saveButton">Save</button>
-        <button id="loadButton">Load file</button>
-    </div>
-    <canvas id="canvas" width="600" height="600"></canvas>
-    <script type="module">
-        import initSync from "./node_modules/scrible-pad/scrible_pad.js";
+        <button id="saveButton">💾 Save</button>
+        <button id="loadButton">📂 Load</button>
+      </div>
+    </header>
 
-        // Initialize the WebAssembly module
-        initSync().then(() => {
-            console.log("WASM initialized");
-        }).catch(err => {
-            console.error("Error initializing WASM:", err);
-        });
-    </script>
-    <script type="module" src="index.js"></script>
+    <main>
+      <canvas id="canvas" width="800" height="600"></canvas>
+    </main>
+
+    <footer>
+      <span>Real-time collaborative drawing pad built with Rust + WASM</span>
+    </footer>
+  </div>
+
+  <!-- WASM + JS logic -->
+  <script type="module">
+    import init from "./node_modules/scrible-pad/scrible_pad.js";
+    init().then(() => console.log("WASM loaded"));
+  </script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
