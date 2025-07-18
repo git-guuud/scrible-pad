@@ -1,4 +1,5 @@
 import initSync, {send, receive_messages, connect_to_websocket} from "./node_modules/scrible-pad/scrible_pad.js";
+import {addPoint, addStroke} from "./node_modules/scrible-pad/snippets/scrible-pad-5c7370a289053622/site/rust_call.js"
 
 let painting = false;
 let stroke = {
@@ -18,33 +19,42 @@ connect_to_websocket().then(() => {
 });
 
 async function startPainting(e) {
-    ctx.beginPath();
+    // ctx.beginPath();
+    await send("Stroke:" + JSON.stringify(stroke));
+    addStroke(JSON.stringify(stroke));
     painting = true;
-    draw(e);
+    // draw(e);
 }
 
 async function stopPainting() {
-    await send(JSON.stringify(stroke));
     painting = false;
-    stroke.points = []; // Clear points after sending
+    // stroke.points = []; // Clear points after sending
 }
 
-function draw(e) {
+function draw(e) { // Draw locally and broadcast 
     if (!painting) return;
 
-    ctx.lineWidth = stroke.width;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = stroke.color;
+    // ctx.lineWidth = stroke.width;
+    // ctx.lineCap = "round";
+    // ctx.strokeStyle = stroke.color;
     
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-    stroke.points.push({ x: e.offsetX, y: e.offsetY });
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
+    // ctx.lineTo(e.offsetX, e.offsetY);
+    // ctx.stroke();
+    // stroke.points.push({ x: e.offsetX, y: e.offsetY });
+    // ctx.beginPath();
+    // ctx.moveTo(e.offsetX, e.offsetY);
+    send(JSON.stringify({
+        x: e.offsetX,
+        y: e.offsetY
+    }));
+    addPoint(JSON.stringify({
+        x: e.offsetX,
+        y: e.offsetY
+    }));
 }
 
 canvas.addEventListener("mousedown", startPainting);
-canvas.addEventListener("mouseup", stopPainting);
+document.addEventListener("mouseup", stopPainting);
 canvas.addEventListener("mousemove", draw);
 document.getElementById("clearButton").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

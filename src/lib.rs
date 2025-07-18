@@ -14,23 +14,24 @@ static GLOBAL_WRITE: OnceLock<Mutex<SplitSink<WsStream, WsMessage>>> = OnceLock:
 static GLOBAL_READ: OnceLock<Mutex<SplitStream<WsStream>>> = OnceLock::new();
 
 
-#[derive(Serialize, Deserialize)]
-struct Stroke {
-    pub color: String,
-    pub width: f32,
-    pub points: Vec<Pos>,
-}
+// #[derive(Serialize, Deserialize)]
+// struct Stroke {
+//     pub color: String,
+//     pub width: f32,
+//     pub points: Vec<Pos>,
+// }
 
-#[wasm_bindgen]
-#[derive(Serialize, Deserialize)]
-struct Pos {
-    x: f32,
-    y: f32,
-}
+// #[wasm_bindgen]
+// #[derive(Serialize, Deserialize)]
+// struct Pos {
+//     x: f32,
+//     y: f32,
+// }
 
 #[wasm_bindgen(module = "/site/rust_call.js")]
 extern "C" {
-    pub fn draw(jsonStroke: String);
+    pub fn addStroke(jsonStroke: String);
+    pub fn addPoint(jsonPoint: String);
     pub fn log(message: String);
     pub fn clear();
 }
@@ -75,7 +76,12 @@ pub async fn receive_messages() {
                         clear();
                         continue;
                     }
-                    draw(text);
+                    else if text.starts_with("Stroke:") {
+                        addStroke((&text[7..]).to_string()); // Remove "Stroke:" prefix
+                    }
+                    else {
+                        addPoint(text);
+                    }
                 }
                 _ => {
                     // Handle other message types if needed
