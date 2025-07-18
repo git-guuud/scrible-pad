@@ -1,6 +1,7 @@
 let strokes = [];
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+let pngData = null;
 
 export function addStroke(jsonStroke) {
     const stroke = JSON.parse(jsonStroke);
@@ -8,6 +9,11 @@ export function addStroke(jsonStroke) {
 
 
     strokes.push(stroke);
+    const img = new Image();
+    img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+    };
+    img.src = `data:image/png;base64,${pngData}`;
     for (const s of strokes) {
         ctx.lineCap = "round";
         ctx.strokeStyle = s.color;
@@ -38,8 +44,8 @@ export function clear() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pngData = null;
     strokes = [];
-    lastStrokeId = 0;
     console.log("Canvas cleared");
 }
 
@@ -47,6 +53,33 @@ export function log(message) {
     console.log("Log from Rust:", message);
 }
 
-export function getLastStrokeId() {
-    return lastStrokeId;
-}   
+export function setStrokeList(jsonStrokes) {
+    console.log("Setting stroke list:", jsonStrokes);
+    strokes = JSON.parse(jsonStrokes).data;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of strokes) {
+        ctx.lineCap = "round";
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = s.width;
+        ctx.beginPath();
+        if (s.points.length > 0) {
+            ctx.moveTo(s.points[0].x, s.points[0].y);
+            for (let i = 1; i < s.points.length; i++) {
+                ctx.lineTo(s.points[i].x, s.points[i].y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(s.points[i].x, s.points[i].y);
+            }
+        }
+    }
+}
+
+export function setPNG(pngData) {
+    pngData = pngData;
+    strokes = []; 
+    const img = new Image();
+    img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+    };
+    img.src = `data:image/png;base64,${pngData}`;
+}

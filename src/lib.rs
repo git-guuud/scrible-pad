@@ -4,7 +4,6 @@
 
 
 use wasm_bindgen::prelude::*;
-use serde::{Deserialize, Serialize};
 
 use std::sync::{OnceLock, Mutex};
 use ws_stream_wasm::{WsMessage, WsMeta, WsStream};
@@ -31,9 +30,11 @@ static GLOBAL_READ: OnceLock<Mutex<SplitStream<WsStream>>> = OnceLock::new();
 #[wasm_bindgen(module = "/site/rust_call.js")]
 extern "C" {
     pub fn addStroke(jsonStroke: String);
+    pub fn setStrokeList(jsonStrokes: String);
     pub fn addPoint(jsonPoint: String);
     pub fn log(message: String);
     pub fn clear();
+    pub fn setPNG(base64: String);
 }
 
 
@@ -78,6 +79,12 @@ pub async fn receive_messages() {
                     }
                     else if text.starts_with("Stroke:") {
                         addStroke((&text[7..]).to_string()); // Remove "Stroke:" prefix
+                    }
+                    else if text.starts_with("Saved:") {
+                        setStrokeList((&text[6..]).to_string()); // Remove "Saved:" prefix
+                    }
+                    else if text.starts_with("Load:") {
+                        setPNG((&text[5..]).to_string()); // Remove "Load:" prefix
                     }
                     else {
                         addPoint(text);
