@@ -30,7 +30,9 @@ async function stopPainting() {
     if (!painting) return;
     painting = false;
     if (stroke.points.length === 0) return; 
-    send("Save:" + JSON.stringify(stroke));
+    let pngData = canvas.toDataURL("image/png").split(",")[1];
+    setPNG(pngData); 
+    send("Load:" + pngData);
     stroke.points = []; // Clear points after sending
 }
 
@@ -76,6 +78,7 @@ document.getElementById("widthPicker").addEventListener("input", (e) => {
 
 document.getElementById("saveButton").addEventListener("click", () => {
     let imageData = canvas.toDataURL("image/png");
+
     let link = document.createElement("a");
     link.href = imageData;
     link.download = "drawing.png";

@@ -1,19 +1,19 @@
 let strokes = [];
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-let pngData = null;
+let PNGDATA = null;
 
 export function addStroke(jsonStroke) {
     const stroke = JSON.parse(jsonStroke);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
+    console.log(PNGDATA);
+    setPNG(PNGDATA); // Redraw the existing image if available
     strokes.push(stroke);
-    const img = new Image();
-    img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-    };
-    img.src = `data:image/png;base64,${pngData}`;
+    // const img = new Image();
+    // img.onload = () => {
+    //     ctx.drawImage(img, 0, 0);
+    // };
+    // img.src = `data:image/png;base64,${pngData}`;
+    console.log("Image added");
     for (const s of strokes) {
         ctx.lineCap = "round";
         ctx.strokeStyle = s.color;
@@ -44,7 +44,7 @@ export function clear() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pngData = null;
+    PNGDATA = null;
     strokes = [];
     console.log("Canvas cleared");
 }
@@ -75,7 +75,7 @@ export function setStrokeList(jsonStrokes) {
 }
 
 export function setPNG(pngData) {
-    pngData = pngData;
+    PNGDATA = pngData;
     strokes = []; 
     const img = new Image();
     img.onload = () => {

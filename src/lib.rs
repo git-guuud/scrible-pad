@@ -80,9 +80,6 @@ pub async fn receive_messages() {
                     else if text.starts_with("Stroke:") {
                         addStroke((&text[7..]).to_string()); // Remove "Stroke:" prefix
                     }
-                    else if text.starts_with("Saved:") {
-                        setStrokeList((&text[6..]).to_string()); // Remove "Saved:" prefix
-                    }
                     else if text.starts_with("Load:") {
                         setPNG((&text[5..]).to_string()); // Remove "Load:" prefix
                     }
