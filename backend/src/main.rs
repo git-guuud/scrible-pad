@@ -11,7 +11,7 @@ type PeerMap = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<Message>>>>;
 
 #[tokio::main]
 pub async fn main() {
-    let addr = "127.0.0.1:8080";
+    let addr = "0.0.0.0:8080";
 
     let listener = TcpListener::bind(addr).await.unwrap();
     println!("Listening on {}", addr);
