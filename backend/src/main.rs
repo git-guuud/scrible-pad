@@ -11,10 +11,10 @@ type PeerMap = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<Message>>>>;
 
 #[tokio::main]
 pub async fn main() {
-    let addr = "0.0.0.0:8080";
+    let port = std::env::var("PORT").unwrap_or_else(|_| "10000".to_string());
+    let addr = format!("0.0.0.0:{}", port);
 
     let listener = TcpListener::bind(addr).await.unwrap();
-    println!("Listening on {}", addr);
     let peer_map: PeerMap = Arc::new(Mutex::new(HashMap::new()));
     let saved_data = Arc::new(Mutex::new("".to_string()));
     while let Ok((stream, addr)) = listener.accept().await {
