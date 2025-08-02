@@ -40,7 +40,7 @@ async fn handle_connection(
     addr: SocketAddr,
     saved_data: Arc<Mutex<String>>,
 ) {
-    let ws_stream = accept_async(raw_stream).await.unwrap();
+    let ws_stream = accept_async(raw_stream).await.expect("Error during WebSocket handshake");
     println!("New WebSocket connection established from {}", addr);
     let (mut write, read) = ws_stream.split();
     let (tx, rx) = unbounded();
