@@ -42,7 +42,7 @@ async fn handle_connection(
 ) {
     let ws_stream = accept_async(raw_stream).await.unwrap();
     println!("New WebSocket connection established from {}", addr);
-    let (mut write, mut read) = ws_stream.split();
+    let (mut write, read) = ws_stream.split();
     let (tx, rx) = unbounded();
     peer_map.lock().await.insert(addr, tx);
     let saved_text = saved_data.lock().await.clone();
