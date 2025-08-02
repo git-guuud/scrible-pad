@@ -42,7 +42,7 @@ extern "C" {
 
 #[wasm_bindgen]
 pub async fn connect_to_websocket() {
-    let (_, ws_stream) = WsMeta::connect("ws://127.0.0.1:8080", None).await.unwrap();
+    let (_, ws_stream) = WsMeta::connect("wss://scrible-pad.onrender.com", None).await.unwrap();
     let (write, read) = ws_stream.split();
     GLOBAL_WRITE.get_or_init(|| Mutex::new(write));
     GLOBAL_READ.get_or_init(|| Mutex::new(read));
